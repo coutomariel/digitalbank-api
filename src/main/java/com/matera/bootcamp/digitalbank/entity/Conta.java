@@ -27,7 +27,7 @@ public class Conta extends EntidadeBase{
     private BigDecimal saldo;
 
     @Enumerated(EnumType.STRING)
-    @Column(length = 1, nullable = false)
+    @Column
     private SituacaoConta situacao;
 
     @OneToOne

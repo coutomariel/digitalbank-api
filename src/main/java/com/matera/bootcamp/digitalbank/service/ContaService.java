@@ -50,7 +50,7 @@ public class ContaService {
 
     public ContaResponseDto consultaContaPorIdCliente(Long id){
         Conta conta = contaRepository.findByClienteId(id)
-                .orElseThrow(() -> new ServiceException("Conta não encontrada!")));
+                .orElseThrow(() -> new ServiceException("Conta não encontrada!"));
         return EntitytoContaResponseDto(conta);
     }
 
