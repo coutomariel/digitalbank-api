@@ -4,17 +4,22 @@ import com.matera.bootcamp.digitalbank.dto.response.ContaResponseDto;
 import com.matera.bootcamp.digitalbank.entity.Cliente;
 import com.matera.bootcamp.digitalbank.entity.Conta;
 import com.matera.bootcamp.digitalbank.repository.ContaRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
 public class ContaService {
 
     final ContaRepository contaRepository;
+
+    @Value("${agencia.numeroMaximo:3}")
+    private Integer numeroMaximoAgencia;
 
     public ContaService(ContaRepository contaRepository) {
         this.contaRepository = contaRepository;
@@ -25,7 +30,7 @@ public class ContaService {
         validaConta(cliente);
         Conta conta = Conta
                 .builder()
-                    .numeroAgencia(1)
+                    .numeroAgencia(new Random().nextInt(numeroMaximoAgencia)+1)
                     .numeroConta(cliente.getTelefone())
                     .cliente(cliente)
                     .status("A")

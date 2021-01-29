@@ -89,6 +89,11 @@ public class AppStartupRunner implements ApplicationRunner {
         Cliente clienteAlterado = clienteService.consultar(2L);
         clienteService.atualizar(2L, segundoClienteAlterado);
         System.out.println("Cliente após alteração -> "+ clienteService.consultar(2L));
-        System.out.println("Qtde de clientes: " + clienteService.consultaTodos().size());
+
+        System.out.println("\nQtde de clientes: " + clienteService.consultaTodos().size());
+
+        System.out.println("\nConta do cliente -> " + conta.getNumeroAgencia());
+        System.out.println("Conta do cliente -> " + outraConta.getNumeroAgencia());
+
     }
 }
