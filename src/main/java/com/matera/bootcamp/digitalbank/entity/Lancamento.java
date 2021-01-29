@@ -4,7 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -20,7 +20,7 @@ public class Lancamento extends EntidadeBase{
     private String codigoAutenticacao;
 
     @Column(nullable = false)
-    private LocalDate dataHora;
+    private LocalDateTime dataHora;
 
     @Column(precision = 2, scale = 2, nullable = false)
     private BigDecimal valor;

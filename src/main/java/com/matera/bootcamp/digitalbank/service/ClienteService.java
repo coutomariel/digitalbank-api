@@ -4,6 +4,7 @@ import com.matera.bootcamp.digitalbank.dto.request.ClienteRequestDto;
 import com.matera.bootcamp.digitalbank.dto.response.ClienteResponseDto;
 import com.matera.bootcamp.digitalbank.dto.response.ContaResponseDto;
 import com.matera.bootcamp.digitalbank.entity.Cliente;
+import com.matera.bootcamp.digitalbank.exception.ServiceException;
 import com.matera.bootcamp.digitalbank.repository.ClienteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +39,6 @@ public class ClienteService {
         clienteRepository.save(clienteAtualizado);
     }
 
-
     public List<ClienteResponseDto> consultaTodos(){
         List<Cliente> clientes = clienteRepository.findAll();
         return clientes.stream()
@@ -47,13 +47,12 @@ public class ClienteService {
 
     public Cliente consultar(Long id){
         return clienteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cliente de id "+ id + " não encontrado!"));
+                .orElseThrow(() -> new ServiceException("Cliente de id "+ id + " não encontrado!"));
     }
-
 
     private void validaCadadastro(String cpf) {
         if(clienteRepository.findByCpf(cpf).isPresent()){
-            throw new RuntimeException("Já existe cliente com este cpf!");
+            throw new ServiceException("Já existe cliente com este cpf!");
         }
     }
 
@@ -61,7 +60,7 @@ public class ClienteService {
         Optional<Cliente> cliente = clienteRepository.findByCpf(clienteRequestDto.getCpf());
 
         if (cliente.isPresent() && !cliente.get().getId().equals(id)){
-            throw new RuntimeException("Cpf da conta não pode ser alterado!");
+            throw new ServiceException("Cpf da conta não pode ser alterado!");
         }
     }
 
@@ -96,7 +95,6 @@ public class ClienteService {
                     .rendaMensal(cliente.getRendaMensal())
                     .telefone(cliente.getTelefone())
                 .build();
-
         return dto;
     }
 }
