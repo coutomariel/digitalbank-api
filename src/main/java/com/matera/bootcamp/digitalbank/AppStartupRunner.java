@@ -1,8 +1,12 @@
 package com.matera.bootcamp.digitalbank;
 
 
+import com.matera.bootcamp.digitalbank.dto.request.ClienteRequestDto;
+import com.matera.bootcamp.digitalbank.dto.response.ContaResponseDto;
 import com.matera.bootcamp.digitalbank.entity.Cliente;
+import com.matera.bootcamp.digitalbank.entity.Conta;
 import com.matera.bootcamp.digitalbank.repository.ClienteRepository;
+import com.matera.bootcamp.digitalbank.service.ClienteService;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -14,45 +18,77 @@ public class AppStartupRunner implements ApplicationRunner {
 
 
     ClienteRepository clienteRepository;
+    ClienteService clienteService;
 
-    public AppStartupRunner(ClienteRepository clienteRepository) {
+    public AppStartupRunner(ClienteRepository clienteRepository, ClienteService clienteService) {
         this.clienteRepository = clienteRepository;
+        this.clienteService = clienteService;
     }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        System.out.println("Hello world!");
 
-//        Cliente cliente = new Cliente(1L,"João", "99915153181", "5199551814",
-//        new BigDecimal(1000), "Logradouro", 99915, "Compl", "Bairro",
-//        "Cidade", "UF", "95990515");
-
-        Cliente cliente = Cliente
+        ClienteRequestDto cliente = ClienteRequestDto
                 .builder().
-                        nome("João da Couves").
-                        telefone("5144151832").
+                        nome("João da Neves").
+                        telefone(5144151832L).
                         cpf("02151541732").
+                        rendaMensal(new BigDecimal(1000)).
                         cep("99515781").
                         logradouro("Logradouro").
+                        numero(295).
                         complemento("Apto").
                         bairro("Bairro").
-                        cidade("Maringá").build();
+                        cidade("Maringá").
+                        uf("PR")
+                .build();
+
+        ClienteRequestDto segundoCliente = ClienteRequestDto
+                .builder().
+                        nome("Brandon Stark").
+                        telefone(5144153321L).
+                        cpf("32541483098").
+                        rendaMensal(new BigDecimal(1000)).
+                        cep("99515781").
+                        logradouro("Logradouro").
+                        numero(295).
+                        complemento("Apto").
+                        bairro("Bairro").
+                        cidade("Maringá").
+                        uf("PR")
+                .build();
 
 
+        //Usando serviço de cadastro
+        ContaResponseDto conta  = clienteService.cadastrar(cliente);
+        ContaResponseDto outraConta  = clienteService.cadastrar(segundoCliente);
 
+        //Usando consulta pelo id do serviço de cliente
+        System.out.println("Cliente salvo -> " + clienteService.consultar(conta.getIdCliente()));
 
-        Cliente clienteSalvo = clienteRepository.save(cliente);
-        System.out.println("Cliente salvo -> " + clienteSalvo);
+        //Criando segundo cliente
 
-        Cliente clientePesquisado = clienteRepository.findByCpf("99915153181").orElse(null);
-        System.out.println("Cliente pesquisado -> " + clienteSalvo);
+        //Consultando todos
+        System.out.println("Lista de clientes" + clienteService.consultaTodos());
 
+        ClienteRequestDto segundoClienteAlterado = ClienteRequestDto
+                .builder().
+                        nome("Brandon Stark").
+                        telefone(5144153321L).
+                        cpf("32541483098").
+                        rendaMensal(new BigDecimal(1000)).
+                        cep("99515781").
+                        logradouro("Logradouro").
+                        numero(295).
+                        complemento("Apto").
+                        bairro("Outro Bairro").
+                        cidade("Maringá").
+                        uf("PR")
+                .build();
 
-        Cliente clientePesquisadoNaQuery = clienteRepository.buscaPorCpf("99915153181").orElse(null);
-        System.out.println("Cliente pesquisado na query -> " + clientePesquisadoNaQuery);
-
-        Cliente clientePesquisadoNativeQuery = clienteRepository.buscaPorCpf("99915153181").orElse(null);
-        System.out.println("Cliente pesquisado native query -> " + clientePesquisadoNativeQuery);
-
+        Cliente clienteAlterado = clienteService.consultar(2L);
+        clienteService.atualizar(2L, segundoClienteAlterado);
+        System.out.println("Cliente após alteração -> "+ clienteService.consultar(2L));
+        System.out.println("Qtde de clientes: " + clienteService.consultaTodos().size());
     }
 }
