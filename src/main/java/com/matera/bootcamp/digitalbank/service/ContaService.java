@@ -1,16 +1,25 @@
 package com.matera.bootcamp.digitalbank.service;
 
+import com.matera.bootcamp.digitalbank.dto.request.LancamentoRequestDto;
+import com.matera.bootcamp.digitalbank.dto.request.TransferenciaRequestDto;
+import com.matera.bootcamp.digitalbank.dto.response.ComprovantesResponseDto;
 import com.matera.bootcamp.digitalbank.dto.response.ContaResponseDto;
+import com.matera.bootcamp.digitalbank.dto.response.ExtratoResponseDto;
 import com.matera.bootcamp.digitalbank.entity.Cliente;
 import com.matera.bootcamp.digitalbank.entity.Conta;
+import com.matera.bootcamp.digitalbank.entity.Lancamento;
+import com.matera.bootcamp.digitalbank.enumerator.Natureza;
 import com.matera.bootcamp.digitalbank.enumerator.SituacaoConta;
+import com.matera.bootcamp.digitalbank.enumerator.TipoLancamento;
 import com.matera.bootcamp.digitalbank.exception.ServiceException;
 import com.matera.bootcamp.digitalbank.repository.ContaRepository;
+import com.matera.bootcamp.digitalbank.utils.DigitalBankUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -19,12 +28,14 @@ import java.util.stream.Collectors;
 public class ContaService {
 
     final ContaRepository contaRepository;
+    final LancamentoService lancamentoService;
 
     @Value("${agencia.numeroMaximo:3}")
     private Integer numeroMaximoAgencia;
 
-    public ContaService(ContaRepository contaRepository) {
+    public ContaService(ContaRepository contaRepository, LancamentoService lancamentoService) {
         this.contaRepository = contaRepository;
+        this.lancamentoService = lancamentoService;
     }
 
     @Transactional
@@ -40,18 +51,97 @@ public class ContaService {
                 .build();
 
         Conta ContaSalva  = contaRepository.save(conta);
-        return EntitytoContaResponseDto(ContaSalva);
+        return entitytoContaResponseDto(ContaSalva);
+    }
+
+    @Transactional
+    public ComprovantesResponseDto efetuaLancamento(Long id, LancamentoRequestDto lancamentoRequestDTO, TipoLancamento tipoLancamento) {
+        Conta conta = consultaPorId(id);
+
+        Lancamento lancamento = insereLancamento(lancamentoRequestDTO, conta, defineNaturezaPorTipoLancamento(tipoLancamento), tipoLancamento);
+
+        return lancamentoService.entidadeParaComprovanteResponseDTO(lancamento);
+    }
+
+    @Transactional
+    public ComprovantesResponseDto efetuaTransferencia(Long id, TransferenciaRequestDto transferenciaRequestDTO) {
+        Conta contaDebito = consultaPorId(id);
+
+        Conta contaCredito = contaRepository.findByNumeroAgenciaAndNumeroConta(transferenciaRequestDTO.getNumeroAgencia(), transferenciaRequestDTO.getNumeroConta())
+                .orElseThrow(() -> new ServiceException("Conta de agência " + transferenciaRequestDTO.getNumeroAgencia() + " e número " + transferenciaRequestDTO.getNumeroConta().toString() + " não encontrada."));
+
+        Lancamento lancamentoDebito = insereLancamento(new LancamentoRequestDto(transferenciaRequestDTO.getValor(), transferenciaRequestDTO.getDescricao()), contaDebito, Natureza.DEBITO, TipoLancamento.TRANSFERENCIA);
+        Lancamento lancamentoCredito = insereLancamento(new LancamentoRequestDto(transferenciaRequestDTO.getValor(), transferenciaRequestDTO.getDescricao()), contaCredito, Natureza.CREDITO, TipoLancamento.TRANSFERENCIA);
+
+        return lancamentoService.efetuaTransferencia(lancamentoDebito, lancamentoCredito);
+    }
+
+    public ExtratoResponseDto consultaExtratoCompleto(Long id) {
+        Conta conta = consultaPorId(id);
+
+        List<ComprovantesResponseDto> comprovantesResponseDTO = lancamentoService.consultaExtratoCompleto(conta);
+
+        ExtratoResponseDto extratoResponseDTO = new ExtratoResponseDto();
+        extratoResponseDTO.setConta(entitytoContaResponseDto(conta));
+        extratoResponseDTO.setLancamentos(comprovantesResponseDTO);
+
+        return extratoResponseDTO;
+    }
+
+    public ExtratoResponseDto consultaExtratoPorPeriodo(Long id, LocalDate dataInicial, LocalDate dataFinal) {
+        Conta conta = consultaPorId(id);
+
+        List<ComprovantesResponseDto> comprovantesResponseDTO = lancamentoService.consultaExtratoPorPeriodo(conta, dataInicial, dataFinal);
+
+        ExtratoResponseDto extratoResponseDTO = new ExtratoResponseDto();
+        extratoResponseDTO.setConta(entitytoContaResponseDto(conta));
+        extratoResponseDTO.setLancamentos(comprovantesResponseDTO);
+
+        return extratoResponseDTO;
+    }
+
+    @Transactional
+    public ComprovantesResponseDto estornaLancamento(Long idConta, Long idLancamento) {
+        return lancamentoService.estornaLancamento(idConta, idLancamento);
+    }
+
+    public ComprovantesResponseDto consultaComprovanteLancamento(Long idConta, Long idLancamento) {
+        return lancamentoService.consultaComprovanteLancamento(idConta, idLancamento);
+    }
+
+    @Transactional
+    public void removeLancamentoEstorno(Long idConta, Long idLancamento) {
+        lancamentoService.removeLancamentoEstorno(idConta, idLancamento);
+    }
+
+    private Lancamento insereLancamento(LancamentoRequestDto lancamentoRequestDTO, Conta conta, Natureza natureza, TipoLancamento tipoLancamento) {
+        Lancamento lancamento = lancamentoService.efetuaLancamento(lancamentoRequestDTO, conta, natureza, tipoLancamento);
+
+        atualizaSaldo(conta, lancamento.getValor(), natureza);
+
+        return lancamento;
+    }
+
+    private void atualizaSaldo(Conta conta, BigDecimal valorLancamento, Natureza natureza) {
+        BigDecimal saldo = DigitalBankUtils.calculaSaldo(natureza, valorLancamento, conta.getSaldo());
+
+        conta.setSaldo(saldo);
+        contaRepository.save(conta);
+    }
+
+    private Natureza defineNaturezaPorTipoLancamento(TipoLancamento tipoLancamento) {
+        return TipoLancamento.DEPOSITO.equals(tipoLancamento) ? Natureza.CREDITO : Natureza.DEBITO;
     }
 
     public List<ContaResponseDto> consultaTodas(){
         List<Conta> contas = contaRepository.findAll();
-        return contas.stream().map(conta -> EntitytoContaResponseDto(conta)).collect(Collectors.toList());
+        return contas.stream().map(conta -> entitytoContaResponseDto(conta)).collect(Collectors.toList());
     }
 
     public ContaResponseDto consultaContaPorIdCliente(Long id){
         Conta conta = contaRepository.findByClienteId(id)
                 .orElseThrow(() -> new ServiceException("Conta não encontrada!"));
-        return EntitytoContaResponseDto(conta);
+        return entitytoContaResponseDto(conta);
     }
 
 
@@ -95,7 +185,7 @@ public class ContaService {
         }
     }
 
-    private ContaResponseDto EntitytoContaResponseDto(Conta conta) {
+    private ContaResponseDto entitytoContaResponseDto(Conta conta) {
         ContaResponseDto contaResponseDto = ContaResponseDto
                 .builder()
                     .idCliente(conta.getCliente().getId())
