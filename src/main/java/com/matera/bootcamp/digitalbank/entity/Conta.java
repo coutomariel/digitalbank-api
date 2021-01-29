@@ -1,5 +1,6 @@
 package com.matera.bootcamp.digitalbank.entity;
 
+import com.matera.bootcamp.digitalbank.enumerator.SituacaoConta;
 import lombok.*;
 
 import javax.persistence.*;
@@ -25,8 +26,9 @@ public class Conta extends EntidadeBase{
     @Column(precision = 20, scale = 2, nullable = false )
     private BigDecimal saldo;
 
+    @Enumerated(EnumType.STRING)
     @Column(length = 1, nullable = false)
-    private String situacao;
+    private SituacaoConta situacao;
 
     @OneToOne
     @JoinColumn(name = "id_cliente", nullable = false)

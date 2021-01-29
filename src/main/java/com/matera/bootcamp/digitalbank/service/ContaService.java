@@ -3,6 +3,7 @@ package com.matera.bootcamp.digitalbank.service;
 import com.matera.bootcamp.digitalbank.dto.response.ContaResponseDto;
 import com.matera.bootcamp.digitalbank.entity.Cliente;
 import com.matera.bootcamp.digitalbank.entity.Conta;
+import com.matera.bootcamp.digitalbank.enumerator.SituacaoConta;
 import com.matera.bootcamp.digitalbank.repository.ContaRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,7 @@ public class ContaService {
                     .numeroAgencia(new Random().nextInt(numeroMaximoAgencia)+1)
                     .numeroConta(cliente.getTelefone())
                     .cliente(cliente)
-                    .situacao("A")
+                    .situacao(SituacaoConta.ABERTA)
                     .saldo(BigDecimal.ZERO)
                 .build();
 
@@ -56,12 +57,12 @@ public class ContaService {
     public void bloqueiaConta(Long id){
         Conta conta = consultaPorId(id);
         validaBloqueio(conta);
-        conta.setSituacao("B");
+        conta.setSituacao(SituacaoConta.BLOQUEADA);
         contaRepository.save(conta);
     }
 
     private void validaBloqueio(Conta conta) {
-        if("B".equals(conta.getSituacao())){
+        if(SituacaoConta.BLOQUEADA.getDescricao().equals(conta.getSituacao())){
             throw new RuntimeException("Conta de ID "+ conta.getId() + "já se encontra bloqueada.");
         }
 
@@ -70,13 +71,13 @@ public class ContaService {
     public void desbloqueiaConta(Long id){
         Conta conta = consultaPorId(id);
         validaDesbloqueio(conta);
-        conta.setSituacao("A");
+        conta.setSituacao(SituacaoConta.ABERTA);
         contaRepository.save(conta);
 
     }
 
     private void validaDesbloqueio(Conta conta) {
-        if("A".equals(conta.getSituacao())){
+        if(SituacaoConta.ABERTA.getDescricao().equals(conta.getSituacao())){
             throw  new RuntimeException("Conta de ID " + conta.getId() + "não está bloqueada.");
         }
     }
@@ -100,7 +101,7 @@ public class ContaService {
                     .idConta(conta.getId())
                     .numeroAgencia(conta.getNumeroAgencia())
                     .numeroConta(conta.getNumeroConta())
-                    .status(conta.getSituacao())
+                    .status(SituacaoConta.ABERTA.getDescricao().equals(conta.getSituacao()) ? "A" : "B")
                     .saldo(conta.getSaldo())
                 .build();
         return contaResponseDto;
