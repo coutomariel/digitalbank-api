@@ -33,7 +33,7 @@ public class ContaService {
                     .numeroAgencia(new Random().nextInt(numeroMaximoAgencia)+1)
                     .numeroConta(cliente.getTelefone())
                     .cliente(cliente)
-                    .status("A")
+                    .situacao("A")
                     .saldo(BigDecimal.ZERO)
                 .build();
 
@@ -56,12 +56,12 @@ public class ContaService {
     public void bloqueiaConta(Long id){
         Conta conta = consultaPorId(id);
         validaBloqueio(conta);
-        conta.setStatus("B");
+        conta.setSituacao("B");
         contaRepository.save(conta);
     }
 
     private void validaBloqueio(Conta conta) {
-        if("B".equals(conta.getStatus())){
+        if("B".equals(conta.getSituacao())){
             throw new RuntimeException("Conta de ID "+ conta.getId() + "já se encontra bloqueada.");
         }
 
@@ -70,13 +70,13 @@ public class ContaService {
     public void desbloqueiaConta(Long id){
         Conta conta = consultaPorId(id);
         validaDesbloqueio(conta);
-        conta.setStatus("A");
+        conta.setSituacao("A");
         contaRepository.save(conta);
 
     }
 
     private void validaDesbloqueio(Conta conta) {
-        if("A".equals(conta.getStatus())){
+        if("A".equals(conta.getSituacao())){
             throw  new RuntimeException("Conta de ID " + conta.getId() + "não está bloqueada.");
         }
     }
@@ -100,7 +100,7 @@ public class ContaService {
                     .idConta(conta.getId())
                     .numeroAgencia(conta.getNumeroAgencia())
                     .numeroConta(conta.getNumeroConta())
-                    .status(conta.getStatus())
+                    .status(conta.getSituacao())
                     .saldo(conta.getSaldo())
                 .build();
         return contaResponseDto;

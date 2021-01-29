@@ -26,7 +26,7 @@ public class Conta extends EntidadeBase{
     private BigDecimal saldo;
 
     @Column(length = 1, nullable = false)
-    private String status;
+    private String situacao;
 
     @OneToOne
     @JoinColumn(name = "id_cliente", nullable = false)
