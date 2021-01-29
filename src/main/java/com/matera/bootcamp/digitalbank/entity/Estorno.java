@@ -12,9 +12,7 @@ import javax.persistence.*;
 @Builder
 @Entity
 @Table(name = "db_estorno")
-public class Estorno {
-    @Id@GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Estorno extends EntidadeBase{
 
     @OneToOne
     @JoinColumn(name = "id_lancamento_original", nullable = false)

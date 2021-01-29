@@ -12,11 +12,7 @@ import javax.persistence.*;
 @Builder
 @Entity
 @Table(name = "db_transferencia")
-public class Transferencia {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Transferencia extends EntidadeBase{
 
     @OneToOne
     @JoinColumn(name = "id_lancamento_debito", nullable = false)

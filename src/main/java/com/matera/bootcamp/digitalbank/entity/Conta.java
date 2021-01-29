@@ -14,11 +14,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "db_conta")
-public class Conta {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Conta extends EntidadeBase{
 
     @Column(precision = 4, nullable = false)
     private Integer numeroAgencia;
