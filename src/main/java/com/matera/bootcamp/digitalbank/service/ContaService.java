@@ -4,6 +4,7 @@ import com.matera.bootcamp.digitalbank.dto.response.ContaResponseDto;
 import com.matera.bootcamp.digitalbank.entity.Cliente;
 import com.matera.bootcamp.digitalbank.entity.Conta;
 import com.matera.bootcamp.digitalbank.enumerator.SituacaoConta;
+import com.matera.bootcamp.digitalbank.exception.ServiceException;
 import com.matera.bootcamp.digitalbank.repository.ContaRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -49,7 +50,7 @@ public class ContaService {
 
     public ContaResponseDto consultaContaPorIdCliente(Long id){
         Conta conta = contaRepository.findByClienteId(id)
-                .orElseThrow(() -> new RuntimeException(("Conta não encontrada!")));
+                .orElseThrow(() -> new ServiceException("Conta não encontrada!")));
         return EntitytoContaResponseDto(conta);
     }
 
@@ -63,7 +64,7 @@ public class ContaService {
 
     private void validaBloqueio(Conta conta) {
         if(SituacaoConta.BLOQUEADA.getDescricao().equals(conta.getSituacao())){
-            throw new RuntimeException("Conta de ID "+ conta.getId() + "já se encontra bloqueada.");
+            throw new ServiceException("Conta de ID "+ conta.getId() + "já se encontra bloqueada.");
         }
 
     }
@@ -78,19 +79,19 @@ public class ContaService {
 
     private void validaDesbloqueio(Conta conta) {
         if(SituacaoConta.ABERTA.getDescricao().equals(conta.getSituacao())){
-            throw  new RuntimeException("Conta de ID " + conta.getId() + "não está bloqueada.");
+            throw new ServiceException("Conta de ID " + conta.getId() + "não está bloqueada.");
         }
     }
 
 
     public Conta consultaPorId(Long id){
         return contaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Conta  de id "+ id +"não encontrada"));
+                .orElseThrow(() -> new ServiceException("Conta  de id "+ id +"não encontrada"));
     }
 
     private void validaConta(Cliente cliente) {
         if(contaRepository.findByNumeroConta(cliente.getTelefone()).isPresent()){
-            throw new RuntimeException("Já existe uma conta com o número de telefone informado!");
+            throw new ServiceException("Já existe uma conta com o número de telefone informado!");
         }
     }
 
