@@ -9,6 +9,7 @@ import java.util.Optional;
 
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
+    Optional<Cliente> findByTelefone(Long telefone);
     Optional<Cliente> findByCpf(String cpf);
 
     @Query("SELECT cli " +
