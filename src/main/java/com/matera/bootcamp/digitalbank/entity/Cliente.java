@@ -22,7 +22,7 @@ public class Cliente extends EntidadeBase{
     private String cpf;
 
     @Column(precision = 12, nullable = false)
-    private String telefone;
+    private Long telefone;
 
     @Column(precision = 20, scale = 2)
     private BigDecimal rendaMensal;

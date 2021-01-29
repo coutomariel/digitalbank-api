@@ -14,10 +14,7 @@ import java.time.LocalDate;
 @Builder
 @Entity
 @Table(name = "db_lancamentos")
-public class Lancamento {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Lancamento extends EntidadeBase{
 
     @Column(length = 50, nullable = false)
     private String codigoAutenticacao;
