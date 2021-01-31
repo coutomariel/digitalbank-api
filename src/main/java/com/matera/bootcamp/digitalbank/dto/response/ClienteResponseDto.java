@@ -1,9 +1,11 @@
 package com.matera.bootcamp.digitalbank.dto.response;
 
-
 import lombok.*;
 
 import java.math.BigDecimal;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @Getter
 @Setter
@@ -11,6 +13,7 @@ import java.math.BigDecimal;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(Include.NON_NULL)
 public class ClienteResponseDto {
 
     private Long id;
