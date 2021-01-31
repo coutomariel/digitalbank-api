@@ -48,6 +48,6 @@ public class Cliente extends EntidadeBase{
     @Column(length = 8, nullable = false)
     private  String cep;
 
-    @OneToOne
+    @OneToOne(mappedBy = "cliente")
     private Conta conta;
 }
