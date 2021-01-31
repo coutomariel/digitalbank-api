@@ -25,33 +25,41 @@ public class ClienteService {
     }
 
     @Transactional
-    public ContaResponseDto cadastrar(ClienteRequestDto clienteRequestDto){
+    public ContaResponseDto cadastrar(ClienteRequestDto clienteRequestDto) {
         validaCadadastro(clienteRequestDto.getCpf());
         Cliente clienteToSave = dtoToEntity(clienteRequestDto, new Cliente());
         clienteRepository.save(clienteToSave);
         return contaService.cadastrar(clienteToSave);
     }
 
+    public ClienteResponseDto consultar(Long id) {
+        Cliente cliente = consultaPorId(id);
+        return entityToDto(cliente);
+    }
+
     @Transactional
-    public void atualizar(Long id, ClienteRequestDto dto){
+    public void atualizar(Long id, ClienteRequestDto dto) {
         validaAtualizacao(id, dto);
-        Cliente clienteAtualizado = dtoToEntity(dto, consultar(id));
+        Cliente clienteAtualizado = dtoToEntity(dto, consultaPorId(id));
         clienteRepository.save(clienteAtualizado);
     }
 
-    public List<ClienteResponseDto> consultaTodos(){
+    public List<ClienteResponseDto> consultaTodos() {
         List<Cliente> clientes = clienteRepository.findAll();
-        return clientes.stream()
-                .map(cliente -> entityToDto(cliente)).collect(Collectors.toList());
+        return clientes.stream().map(cliente -> entityToDto(cliente)).collect(Collectors.toList());
     }
 
-    public Cliente consultar(Long id){
+    public ContaResponseDto consultaContaPorIdCliente(Long id) {
+        return contaService.consultaContaPorIdCliente(id);
+    }
+
+    public Cliente consultaPorId(Long id) {
         return clienteRepository.findById(id)
-                .orElseThrow(() -> new ServiceException("Cliente de id "+ id + " não encontrado!"));
+                .orElseThrow(() -> new ServiceException("Cliente de id " + id + " não encontrado!"));
     }
 
     private void validaCadadastro(String cpf) {
-        if(clienteRepository.findByCpf(cpf).isPresent()){
+        if (clienteRepository.findByCpf(cpf).isPresent()) {
             throw new ServiceException("Já existe cliente com este cpf!");
         }
     }
@@ -59,7 +67,7 @@ public class ClienteService {
     private void validaAtualizacao(Long id, ClienteRequestDto clienteRequestDto) {
         Optional<Cliente> cliente = clienteRepository.findByCpf(clienteRequestDto.getCpf());
 
-        if (cliente.isPresent() && !cliente.get().getId().equals(id)){
+        if (cliente.isPresent() && !cliente.get().getId().equals(id)) {
             throw new ServiceException("Cpf da conta não pode ser alterado!");
         }
     }
@@ -79,21 +87,11 @@ public class ClienteService {
         return cliente;
     }
 
-    private ClienteResponseDto entityToDto(Cliente cliente){
-        ClienteResponseDto dto = ClienteResponseDto
-                .builder()
-                    .id(cliente.getId())
-                    .bairro(cliente.getBairro())
-                    .cep(cliente.getCep())
-                    .cidade(cliente.getCidade())
-                    .complemento(cliente.getComplemento())
-                    .cpf(cliente.getCpf())
-                    .uf(cliente.getUf())
-                    .logradouro(cliente.getLogradouro())
-                    .nome(cliente.getNome())
-                    .numero(cliente.getNumero())
-                    .rendaMensal(cliente.getRendaMensal())
-                    .telefone(cliente.getTelefone())
+    private ClienteResponseDto entityToDto(Cliente cliente) {
+        ClienteResponseDto dto = ClienteResponseDto.builder().id(cliente.getId()).bairro(cliente.getBairro())
+                .cep(cliente.getCep()).cidade(cliente.getCidade()).complemento(cliente.getComplemento())
+                .cpf(cliente.getCpf()).uf(cliente.getUf()).logradouro(cliente.getLogradouro()).nome(cliente.getNome())
+                .numero(cliente.getNumero()).rendaMensal(cliente.getRendaMensal()).telefone(cliente.getTelefone())
                 .build();
         return dto;
     }

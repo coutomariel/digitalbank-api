@@ -4,12 +4,16 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @ToString
+@JsonInclude(Include.NON_NULL)
 public class ContaResponseDto {
     private Long idCliente;
     private Long idConta;
