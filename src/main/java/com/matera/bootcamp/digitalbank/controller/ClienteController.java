@@ -2,6 +2,8 @@ package com.matera.bootcamp.digitalbank.controller;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import com.matera.bootcamp.digitalbank.dto.request.ClienteRequestDto;
 import com.matera.bootcamp.digitalbank.dto.response.ClienteResponseDto;
 import com.matera.bootcamp.digitalbank.dto.response.ContaResponseDto;
@@ -29,7 +31,8 @@ public class ClienteController extends controllerBase {
     }
 
     @PostMapping
-    public ResponseEntity<ResponseDto<ContaResponseDto>> cadastra(@RequestBody ClienteRequestDto clienteRequestDto) {
+    public ResponseEntity<ResponseDto<ContaResponseDto>> cadastra(
+            @Valid @RequestBody ClienteRequestDto clienteRequestDto) {
         ContaResponseDto contaResponseDto = clienteService.cadastrar(clienteRequestDto);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseDto<>(contaResponseDto));
     }
@@ -53,7 +56,8 @@ public class ClienteController extends controllerBase {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ResponseDto<Void>> atualizar(@PathVariable Long id, @RequestBody ClienteRequestDto dto) {
+    public ResponseEntity<ResponseDto<Void>> atualizar(@PathVariable Long id,
+            @Valid @RequestBody ClienteRequestDto dto) {
         clienteService.atualizar(id, dto);
         return ResponseEntity.noContent().build();
     }

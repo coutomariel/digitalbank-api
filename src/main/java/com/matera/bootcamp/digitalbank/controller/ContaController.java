@@ -3,6 +3,8 @@ package com.matera.bootcamp.digitalbank.controller;
 import java.time.LocalDate;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import com.matera.bootcamp.digitalbank.dto.request.LancamentoRequestDto;
 import com.matera.bootcamp.digitalbank.dto.request.TransferenciaRequestDto;
 import com.matera.bootcamp.digitalbank.dto.response.ComprovantesResponseDto;
@@ -42,7 +44,7 @@ public class ContaController extends controllerBase {
 
     @PostMapping("/{id}/depositar")
     public ResponseEntity<ResponseDto<ComprovantesResponseDto>> efetuaDeposito(@PathVariable Long id,
-            @RequestBody LancamentoRequestDto lancamentoRequestDTO) {
+            @Valid @RequestBody LancamentoRequestDto lancamentoRequestDTO) {
         ComprovantesResponseDto comprovante = contaService.efetuaLancamento(id, lancamentoRequestDTO,
                 TipoLancamento.DEPOSITO);
         return ResponseEntity.ok(new ResponseDto<>(comprovante));
@@ -50,7 +52,7 @@ public class ContaController extends controllerBase {
 
     @PostMapping("/{id}/sacar")
     public ResponseEntity<ResponseDto<ComprovantesResponseDto>> efetuaSaque(@PathVariable Long id,
-            @RequestBody LancamentoRequestDto lancamentoRequestDTO) {
+            @Valid @RequestBody LancamentoRequestDto lancamentoRequestDTO) {
         ComprovantesResponseDto comprovante = contaService.efetuaLancamento(id, lancamentoRequestDTO,
                 TipoLancamento.SAQUE);
         return ResponseEntity.ok(new ResponseDto<>(comprovante));
@@ -58,7 +60,7 @@ public class ContaController extends controllerBase {
 
     @PostMapping("/{id}/pagar")
     public ResponseEntity<ResponseDto<ComprovantesResponseDto>> efetuaPagamento(@PathVariable Long id,
-            @RequestBody LancamentoRequestDto lancamentoRequestDTO) {
+            @Valid @RequestBody LancamentoRequestDto lancamentoRequestDTO) {
         ComprovantesResponseDto comprovante = contaService.efetuaLancamento(id, lancamentoRequestDTO,
                 TipoLancamento.PAGAMENTO);
         return ResponseEntity.ok(new ResponseDto<>(comprovante));
@@ -66,7 +68,7 @@ public class ContaController extends controllerBase {
 
     @PostMapping("/{id}/transferencia")
     public ResponseEntity<ResponseDto<ComprovantesResponseDto>> efetuaTransferencia(@PathVariable Long id,
-            @RequestBody TransferenciaRequestDto transferenciaRequestDTO) {
+            @Valid @RequestBody TransferenciaRequestDto transferenciaRequestDTO) {
         ComprovantesResponseDto comprovante = contaService.efetuaTransferencia(id, transferenciaRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDto<>(comprovante));
     }
